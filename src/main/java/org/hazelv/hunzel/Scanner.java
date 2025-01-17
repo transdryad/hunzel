@@ -97,9 +97,8 @@ class Scanner {
                 } else if (isAlpha(c)) {
                     identifier();
                 } else {
-                    HunZel.error(line, "Unexpected character "  + c + " at position " + current);
+                    HunZel.error(line, "Unexpected character " + c + " at position " + current);
                 }
-                HunZel.error(line, "Unexpected character: " + c + " at position " + current);
                 break;
         }
     }
