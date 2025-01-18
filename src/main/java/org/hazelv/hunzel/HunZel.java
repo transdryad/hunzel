@@ -9,7 +9,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class HunZel {
+    private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             System.out.println("Usage: hunzel [script]");
@@ -24,6 +26,7 @@ public class HunZel {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
         if (hadError) System.exit(65); // error in exit code 65
+        if (hadRuntimeError) System.exit(70); // error in exit code 70
     }
 
     private static void runPrompt() throws IOException {
@@ -45,7 +48,7 @@ public class HunZel {
         Parser parser = new Parser(tokens);
         Expression expression = parser.parse();
         if (hadError) return;
-        System.out.println(new AstPrinter().print(expression));
+        interpreter.interpret(expression);
     }
 
     static void error(int line, String message) {
@@ -63,5 +66,10 @@ public class HunZel {
         } else {
             report(token.line, " at '" + token.lexeme + "'", message);
         }
+    }
+    static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() +
+                "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
     }
 }
