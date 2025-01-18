@@ -19,6 +19,10 @@ public class GenerateAst {
                 "Literal  : Object value",
                 "Unary    : Token operator, Expression right"
         ));
+        defineAst(outputDir, "Statement", Arrays.asList(
+                "Expr : Expression expression",
+                "Print      : Expression expression"
+        ));
     }
     private static void defineAst(String outputDir, String baseName, List<String> types) throws IOException {
         String path = outputDir + "/" + baseName + ".java";

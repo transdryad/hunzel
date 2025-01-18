@@ -1,6 +1,7 @@
 package org.hazelv.hunzel;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.hazelv.hunzel.TokenType.*;
 
@@ -12,15 +13,29 @@ class Parser {
     Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
-    Expression parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+    List<Statement> parse() {
+        List<Statement> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
+        return statements;
     }
     private Expression expression() {
         return equality();
+    }
+    private Statement statement() {
+        if (match(PRINT)) return printStatement();
+        return expressionStatement();
+    }
+    private Statement printStatement() {
+        Expression value = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Statement.Print(value);
+    }
+    private Statement expressionStatement() {
+        Expression expr = expression();
+        consume(SEMICOLON, "Expect ';' after expression.");
+        return new Statement.Expr(expr);
     }
 
     private Expression equality() {
