@@ -16,6 +16,7 @@ public class GenerateAst {
         defineAst(outputDir, "Expression", Arrays.asList(
                 "Assign   : Token name, Expression value",
                 "Binary   : Expression left, Token operator, Expression right",
+                "Call     : Expression callee, Token paren, List<Expression> arguments",
                 "Grouping : Expression expression",
                 "Literal  : Object value",
                 "Logical  : Expression left, Token operator, Expression right",
@@ -25,8 +26,11 @@ public class GenerateAst {
         defineAst(outputDir, "Statement", Arrays.asList(
                 "Block      : List<Statement> statements",
                 "Expr : Expression expression",
+                "Function   : Token name, List<Token> params, List<Statement> body",
                 "If         : Expression condition, Statement thenBranch, Statement elseBranch",
-                "Print      : Expression expression",
+                //replaced with native function.
+                //"Print      : Expression expression",
+                "Return     : Token keyword, Expression value",
                 "Var        : Token name, Expression initializer",
                 "While      : Expression condition, Statement body"
         ));

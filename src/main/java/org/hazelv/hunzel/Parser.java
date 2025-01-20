@@ -26,6 +26,7 @@ class Parser {
     }
     private Statement declaration() {
         try {
+            if (match(FUN)) return function("function");
             if (match(VAR)) return varDeclaration();
 
             return statement();
@@ -37,7 +38,8 @@ class Parser {
     private Statement statement() {
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
-        if (match(PRINT)) return printStatement();
+        //if (match(PRINT)) return printStatement();
+        if (match(RETURN)) return returnStatement();
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Statement.Block(block());
         return expressionStatement();
@@ -88,10 +90,20 @@ class Parser {
         }
         return new Statement.If(condition, thenBranch, elseBranch);
     }
-    private Statement printStatement() {
-        Expression value = expression();
-        consume(SEMICOLON, "Expect ';' after value.");
-        return new Statement.Print(value);
+    // replaced with native function.
+    //private Statement printStatement() {
+        //Expression value = expression();
+        //consume(SEMICOLON, "Expect ';' after value.");
+        //return new Statement.Print(value);
+    //}
+    private Statement returnStatement() {
+        Token keyword = previous();
+        Expression value = null;
+        if (!check(SEMICOLON)) {
+            value = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after return value.");
+        return new Statement.Return(keyword, value);
     }
     private Statement varDeclaration() {
         Token name = consume(IDENTIFIER, "Expect variable name.");
@@ -113,6 +125,23 @@ class Parser {
         Expression expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Statement.Expr(expr);
+    }
+    private Statement.Function function(String kind) {
+        Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while (match(COMMA));
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Statement> body = block();
+        return new Statement.Function(name, parameters, body);
     }
     private List<Statement> block() {
         List<Statement> statements = new ArrayList<>();
@@ -205,7 +234,33 @@ class Parser {
             return new Expression.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+    private Expression finishCall(Expression callee) {
+        List<Expression> arguments = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= 255) {
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.add(expression());
+            } while (match(COMMA));
+        }
+        Token paren = consume(RIGHT_PAREN,
+                "Expect ')' after arguments.");
+        return new Expression.Call(callee, paren, arguments);
+    }
+    private Expression call() {
+        Expression expr = primary();
+
+        while (true) {
+            if (match(LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
     }
 
     private Expression primary() {
