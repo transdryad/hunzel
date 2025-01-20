@@ -2,7 +2,7 @@ package org.hazelv.hunzel;
 
 import java.util.List;
 
-abstract class Expression {
+public abstract class Expression {
   interface Visitor<R> {
     R visitAssignExpression(Assign expression);
     R visitBinaryExpression(Binary expression);
@@ -13,7 +13,7 @@ abstract class Expression {
     R visitUnaryExpression(Unary expression);
     R visitVariableExpression(Variable expression);
   }
-  static class Assign extends Expression {
+  public static class Assign extends Expression {
     Assign(Token name, Expression value) {
       this.name = name;
       this.value = value;
@@ -27,7 +27,7 @@ abstract class Expression {
     final Token name;
     final Expression value;
   }
-  static class Binary extends Expression {
+  public static class Binary extends Expression {
     Binary(Expression left, Token operator, Expression right) {
       this.left = left;
       this.operator = operator;
@@ -43,7 +43,7 @@ abstract class Expression {
     final Token operator;
     final Expression right;
   }
-  static class Call extends Expression {
+  public static class Call extends Expression {
     Call(Expression callee, Token paren, List<Expression> arguments) {
       this.callee = callee;
       this.paren = paren;
@@ -59,7 +59,7 @@ abstract class Expression {
     final Token paren;
     final List<Expression> arguments;
   }
-  static class Grouping extends Expression {
+  public static class Grouping extends Expression {
     Grouping(Expression expression) {
       this.expression = expression;
     }
@@ -71,7 +71,7 @@ abstract class Expression {
 
     final Expression expression;
   }
-  static class Literal extends Expression {
+  public static class Literal extends Expression {
     Literal(Object value) {
       this.value = value;
     }
@@ -83,7 +83,7 @@ abstract class Expression {
 
     final Object value;
   }
-  static class Logical extends Expression {
+  public static class Logical extends Expression {
     Logical(Expression left, Token operator, Expression right) {
       this.left = left;
       this.operator = operator;
@@ -99,7 +99,7 @@ abstract class Expression {
     final Token operator;
     final Expression right;
   }
-  static class Unary extends Expression {
+  public static class Unary extends Expression {
     Unary(Token operator, Expression right) {
       this.operator = operator;
       this.right = right;
@@ -113,7 +113,7 @@ abstract class Expression {
     final Token operator;
     final Expression right;
   }
-  static class Variable extends Expression {
+  public static class Variable extends Expression {
     Variable(Token name) {
       this.name = name;
     }

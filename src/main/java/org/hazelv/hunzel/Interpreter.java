@@ -2,10 +2,13 @@ package org.hazelv.hunzel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
     final Environment globals = new Environment();
     private Environment environment = globals;
+    private final Map<Expression, Integer> locals = new HashMap<>();
     Interpreter() {
         Natives.define(this);
     }
@@ -38,7 +41,15 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
     @Override
     public Object visitVariableExpression(Expression.Variable expr) {
-        return environment.get(expr.name);
+        return lookUpVariable(expr.name, expr);
+    }
+    private Object lookUpVariable(Token name, Expression expr) {
+        Integer distance = locals.get(expr);
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme);
+        } else {
+            return globals.get(name);
+        }
     }
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) return;
@@ -59,17 +70,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
         return a.equals(b);
     }
-    private String stringify(Object object) {
-        if (object == null) return "nil";
-        if (object instanceof Double) {
-            String text = object.toString();
-            if (text.endsWith(".0")) {
-                text = text.substring(0, text.length() - 2);
-            }
-            return text;
-        }
-        return object.toString();
-    }
     void interpret(List<Statement> statements) {
         try {
             for (Statement statement : statements) {
@@ -88,6 +88,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
     private void execute(Statement stmt) {
         stmt.accept(this);
+    }
+    void resolve(Expression expr, int depth) {
+        locals.put(expr, depth);
     }
     void executeBlock(List<Statement> statements, Environment environment) {
         Environment previous = this.environment;
@@ -159,7 +162,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Object visitAssignExpression(Expression.Assign expr) {
         Object value = evaluate(expr.value);
-        environment.assign(expr.name, value);
+        Integer distance = locals.get(expr);
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, value);
+        } else {
+            globals.assign(expr.name, value);
+        }
         return value;
     }
 

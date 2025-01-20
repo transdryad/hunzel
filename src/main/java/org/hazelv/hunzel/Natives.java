@@ -8,7 +8,7 @@ public class Natives {
         interpreter.globals.define("print", print);
         interpreter.globals.define("str", str);
     }
-
+    //func definitions here
     private static final HunZelCallable clock = new HunZelCallable() {
         @Override
         public int arity() {
@@ -47,6 +47,7 @@ public class Natives {
         @Override
         public String toString() { return "<native function 'str'>"; }
     };
+    //helper methods here
     private static String stringify(Object object) {
         if (object == null) return "nil";
         if (object instanceof Double) {
