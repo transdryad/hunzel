@@ -9,6 +9,16 @@ class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void>
         return expr.value;
     }
     @Override
+    public Object visitLogicalExpression(Expression.Logical expr) {
+        Object left = evaluate(expr.left);
+        if (expr.operator.type == TokenType.OR) {
+            if (isTruthy(left)) return left;
+        } else {
+            if (!isTruthy(left)) return left;
+        }
+        return evaluate(expr.right);
+    }
+    @Override
     public Object visitUnaryExpression(Expression.Unary expr) {
         Object right = evaluate(expr.right);
         switch (expr.operator.type) {
@@ -96,6 +106,15 @@ class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void>
         return null;
     }
     @Override
+    public Void visitIfStatement(Statement.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+        return null;
+    }
+    @Override
     public Void visitPrintStatement(Statement.Print stmt) {
         Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
@@ -110,6 +129,14 @@ class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void>
         environment.define(stmt.name.lexeme, value);
         return null;
     }
+    @Override
+    public Void visitWhileStatement(Statement.While stmt) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body);
+        }
+        return null;
+    }
+
     @Override
     public Object visitAssignExpression(Expression.Assign expr) {
         Object value = evaluate(expr.value);
