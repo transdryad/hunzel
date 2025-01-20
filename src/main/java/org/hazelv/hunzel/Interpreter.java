@@ -27,6 +27,20 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return evaluate(expr.right);
     }
     @Override
+    public Object visitSetExpression(Expression.Set expr) {
+        Object object = evaluate(expr.object);
+        if (!(object instanceof HunZelInstance)) {
+            throw new RuntimeError(expr.name, "Only instances have fields.");
+        }
+        Object value = evaluate(expr.value);
+        ((HunZelInstance)object).set(expr.name, value);
+        return value;
+    }
+    @Override
+    public Object visitThisExpression(Expression.This expr) {
+        return lookUpVariable(expr.keyword, expr);
+    }
+    @Override
     public Object visitUnaryExpression(Expression.Unary expr) {
         Object right = evaluate(expr.right);
         switch (expr.operator.type) {
@@ -109,13 +123,25 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return null;
     }
     @Override
+    public Void visitClassStatement(Statement.Class stmt) {
+        environment.define(stmt.name.lexeme, null);
+        Map<String, HunZelFunction> methods = new HashMap<>();
+        for (Statement.Function method : stmt.methods) {
+            HunZelFunction function = new HunZelFunction(method, environment, method.name.lexeme.equals("init"));
+            methods.put(method.name.lexeme, function);
+        }
+        HunZelClass klass = new HunZelClass(stmt.name.lexeme, methods);
+        environment.assign(stmt.name, klass);
+        return null;
+    }
+    @Override
     public Void visitExprStatement(Statement.Expr stmt) {
         evaluate(stmt.expression);
         return null;
     }
     @Override
     public Void visitFunctionStatement(Statement.Function stmt) {
-        HunZelFunction function = new HunZelFunction(stmt, environment);
+        HunZelFunction function = new HunZelFunction(stmt, environment, false);
         environment.define(stmt.name.lexeme, function);
         return null;
     }
@@ -230,5 +256,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                     arguments.size() + ".");
         }
         return function.call(this, arguments);
+    }
+    @Override
+    public Object visitGetExpression(Expression.Get expr) {
+        Object object = evaluate(expr.object);
+        if (object instanceof HunZelInstance) {
+            return ((HunZelInstance) object).get(expr.name);
+        }
+        throw new RuntimeError(expr.name, "Only instances have properties.");
     }
 }

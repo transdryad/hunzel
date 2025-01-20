@@ -14,8 +14,15 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     }
     private enum FunctionType {
         NONE,
-        FUNCTION
+        FUNCTION,
+        INITIALIZER,
+        METHOD
     }
+    private enum ClassType {
+        NONE,
+        CLASS
+    }
+    private ClassType currentClass = ClassType.NONE;
     private void beginScope() {
         scopes.push(new HashMap<String, Boolean>());
     }
@@ -67,6 +74,25 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         return null;
     }
     @Override
+    public Void visitClassStatement(Statement.Class stmt) {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+        declare(stmt.name);
+        define(stmt.name);
+        beginScope();
+        scopes.peek().put("this", true);
+        for (Statement.Function method : stmt.methods) {
+            FunctionType declaration = FunctionType.METHOD;
+            if (method.name.lexeme.equals("init")) {
+                declaration = FunctionType.INITIALIZER;
+            }
+            resolveFunction(method, declaration);
+        }
+        endScope();
+        currentClass = enclosingClass;
+        return null;
+    }
+    @Override
     public Void visitExprStatement(Statement.Expr stmt) {
         resolve(stmt.expression);
         return null;
@@ -97,6 +123,9 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
             HunZel.error(stmt.keyword, "Can't return from top-level code.");
         }
         if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIZER) {
+                HunZel.error(stmt.keyword, "Can't return a value from an initializer.");
+            }
             resolve(stmt.value);
         }
         return null;
@@ -137,6 +166,11 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         return null;
     }
     @Override
+    public Void visitGetExpression(Expression.Get expr) {
+        resolve(expr.object);
+        return null;
+    }
+    @Override
     public Void visitGroupingExpression(Expression.Grouping expr) {
         resolve(expr.expression);
         return null;
@@ -149,6 +183,21 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     public Void visitLogicalExpression(Expression.Logical expr) {
         resolve(expr.left);
         resolve(expr.right);
+        return null;
+    }
+    @Override
+    public Void visitSetExpression(Expression.Set expr) {
+        resolve(expr.value);
+        resolve(expr.object);
+        return null;
+    }
+    @Override
+    public Void visitThisExpression(Expression.This expr) {
+        if (currentClass == ClassType.NONE) {
+            HunZel.error(expr.keyword, "Can't use 'this' outside of a class.");
+            return null;
+        }
+        resolveLocal(expr, expr.keyword);
         return null;
     }
     @Override

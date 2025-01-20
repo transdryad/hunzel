@@ -5,11 +5,19 @@ import java.util.List;
 class HunZelFunction implements HunZelCallable {
     private final Statement.Function declaration;
     private final Environment closure;
-    HunZelFunction(Statement.Function declaration, Environment closure) {
+    private final boolean isInitializer;
+
+    HunZelFunction(Statement.Function declaration, Environment closure, boolean isInitializer) {
+        this.isInitializer = isInitializer;
         this.closure = closure;
         this.declaration = declaration;
     }
-        @Override
+    HunZelFunction bind(HunZelInstance instance) {
+        Environment environment = new Environment(closure);
+        environment.define("this", instance);
+        return new HunZelFunction(declaration, environment, isInitializer);
+    }
+    @Override
     public int arity() {
         return declaration.params.size();
     }
@@ -23,8 +31,11 @@ class HunZelFunction implements HunZelCallable {
         try {
             interpreter.executeBlock(declaration.body, environment);
         } catch (Return returnValue) {
+            if (isInitializer) return closure.getAt(0, "this");
+
             return returnValue.value;
         }
+        if (isInitializer) return closure.getAt(0, "this");
         return null;
     }
     @Override
