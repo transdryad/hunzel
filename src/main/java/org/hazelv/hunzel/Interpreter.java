@@ -37,6 +37,17 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return value;
     }
     @Override
+    public Object visitSuperExpression(Expression.Super expr) {
+        int distance = locals.get(expr);
+        HunZelClass superclass = (HunZelClass)environment.getAt(distance, "super");
+        HunZelInstance object = (HunZelInstance)environment.getAt(distance - 1, "this");
+        HunZelFunction method = superclass.findMethod(expr.method.lexeme);
+        if (method == null) {
+            throw new RuntimeError(expr.method, "Undefined property '" + expr.method.lexeme + "'.");
+        }
+        return method.bind(object);
+    }
+    @Override
     public Object visitThisExpression(Expression.This expr) {
         return lookUpVariable(expr.keyword, expr);
     }
@@ -133,12 +144,20 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             }
         }
         environment.define(stmt.name.lexeme, null);
+        if (stmt.superclass != null) {
+            environment = new Environment(environment);
+            environment.define("super", superclass);
+        }
         Map<String, HunZelFunction> methods = new HashMap<>();
         for (Statement.Function method : stmt.methods) {
             HunZelFunction function = new HunZelFunction(method, environment, method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, function);
         }
         HunZelClass klass = new HunZelClass(stmt.name.lexeme, (HunZelClass)superclass, methods);
+        if (superclass != null) {
+            environment = environment.enclosing;
+        }
+
         environment.assign(stmt.name, klass);
         return null;
     }

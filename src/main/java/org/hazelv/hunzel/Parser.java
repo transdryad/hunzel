@@ -289,6 +289,12 @@ class Parser {
         if (match(TRUE)) return new Expression.Literal(true);
         if (match(NIL)) return new Expression.Literal(null);
 
+        if (match(SUPER)) {
+            Token keyword = previous();
+            consume(DOT, "Expect '.' after 'super'.");
+            Token method = consume(IDENTIFIER, "Expect superclass method name.");
+            return new Expression.Super(keyword, method);
+        }
         if (match(NUMBER, STRING)) {
             return new Expression.Literal(previous().literal);
         }
