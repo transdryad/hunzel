@@ -1,11 +1,9 @@
 fun fib(n) {
-    if (n <= 1) return n;
-    return fib(n - 2) + fib(n - 1);
+  if (n < 2) return n;
+  return fib(n - 1) + fib(n - 2);
 }
-var t;
-for (var i = 0; i < 200; i = i + 1) {
-    t = clock();
-    print(fib(i));
-    t = clock() - t;
-    print("time for round: " + str(t));
-}
+
+var before = clock();
+print(fib(40));
+var after = clock();
+print(after - before);

@@ -79,6 +79,13 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         currentClass = ClassType.CLASS;
         declare(stmt.name);
         define(stmt.name);
+        if (stmt.superclass != null &&
+                stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
+            HunZel.error(stmt.superclass.name, "A class can't inherit from itself.");
+        }
+        if (stmt.superclass != null) {
+            resolve(stmt.superclass);
+        }
         beginScope();
         scopes.peek().put("this", true);
         for (Statement.Function method : stmt.methods) {

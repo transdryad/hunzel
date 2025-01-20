@@ -5,14 +5,19 @@ import java.util.Map;
 
 class HunZelClass implements HunZelCallable {
     final String name;
+    final HunZelClass superclass;
     private final Map<String, HunZelFunction> methods;
-    HunZelClass(String name, Map<String, HunZelFunction> methods) {
+    HunZelClass(String name, HunZelClass superclass, Map<String, HunZelFunction> methods) {
         this.name = name;
+        this.superclass = superclass;
         this.methods = methods;
     }
     HunZelFunction findMethod(String name) {
         if (methods.containsKey(name)) {
             return methods.get(name);
+        }
+        if (superclass != null) {
+            return superclass.findMethod(name);
         }
         return null;
     }

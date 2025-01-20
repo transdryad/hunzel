@@ -26,8 +26,9 @@ public abstract class Statement {
     final List<Statement> statements;
   }
   public static class Class extends Statement {
-    Class(Token name, List<Statement.Function> methods) {
+    Class(Token name, Expression.Variable superclass, List<Statement.Function> methods) {
       this.name = name;
+      this.superclass = superclass;
       this.methods = methods;
     }
 
@@ -37,6 +38,7 @@ public abstract class Statement {
     }
 
     final Token name;
+    final Expression.Variable superclass;
     final List<Statement.Function> methods;
   }
   public static class Expr extends Statement {

@@ -124,13 +124,21 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
     @Override
     public Void visitClassStatement(Statement.Class stmt) {
+        Object superclass = null;
+        if (stmt.superclass != null) {
+            superclass = evaluate(stmt.superclass);
+            if (!(superclass instanceof HunZelClass)) {
+                throw new RuntimeError(stmt.superclass.name,
+                        "Superclass must be a class.");
+            }
+        }
         environment.define(stmt.name.lexeme, null);
         Map<String, HunZelFunction> methods = new HashMap<>();
         for (Statement.Function method : stmt.methods) {
             HunZelFunction function = new HunZelFunction(method, environment, method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, function);
         }
-        HunZelClass klass = new HunZelClass(stmt.name.lexeme, methods);
+        HunZelClass klass = new HunZelClass(stmt.name.lexeme, (HunZelClass)superclass, methods);
         environment.assign(stmt.name, klass);
         return null;
     }
