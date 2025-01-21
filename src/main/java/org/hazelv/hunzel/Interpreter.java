@@ -10,7 +10,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     private Environment environment = globals;
     private final Map<Expression, Integer> locals = new HashMap<>();
     Interpreter() {
-        Natives.define(this);
+        Natives.define_all(this);
     }
     @Override
     public Object visitLiteralExpression(Expression.Literal expr) {
