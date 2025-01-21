@@ -33,6 +33,7 @@ public class GenerateAst {
                 "Expr : Expression expression",
                 "Function   : Token name, List<Token> params, List<Statement> body",
                 "If         : Expression condition, Statement thenBranch, Statement elseBranch",
+                "Import     : Token file",
                 //replaced with native function.
                 //"Print      : Expression expression",
                 "Return     : Token keyword, Expression value",

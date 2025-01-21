@@ -22,7 +22,7 @@ public class HunZel {
         }
     }
 
-    private static void runFile(String path) throws IOException {
+    static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
         if (hadError) System.exit(65); // error in exit code 65
@@ -42,7 +42,7 @@ public class HunZel {
         }
     }
 
-    private static void run(String source) {
+    private static void run(String source) throws IOException {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
         Parser parser = new Parser(tokens);

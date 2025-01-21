@@ -1,5 +1,6 @@
 package org.hazelv.hunzel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -139,8 +140,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (stmt.superclass != null) {
             superclass = evaluate(stmt.superclass);
             if (!(superclass instanceof HunZelClass)) {
-                throw new RuntimeError(stmt.superclass.name,
-                        "Superclass must be a class.");
+                throw new RuntimeError(stmt.superclass.name, "Superclass must be a class.");
             }
         }
         environment.define(stmt.name.lexeme, null);
@@ -179,6 +179,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         } else if (stmt.elseBranch != null) {
             execute(stmt.elseBranch);
         }
+        return null;
+    }
+    @Override
+    public Void visitImportStatement(Statement.Import stmt) {
         return null;
     }
     //replaced with native function

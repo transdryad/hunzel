@@ -1,5 +1,6 @@
 package org.hazelv.hunzel;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,15 +68,18 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         endScope();
         currentFunction = enclosingFunction;
     }
+    private void resolveImport(Statement.Import stmt) throws IOException {
+        HunZel.runFile(stmt.file.lexeme + ".hz");
+    }
     @Override
-    public Void visitBlockStatement(Statement.Block stmt) {
+    public Void visitBlockStatement(Statement.Block stmt)  {
         beginScope();
         resolve(stmt.statements);
         endScope();
         return null;
     }
     @Override
-    public Void visitClassStatement(Statement.Class stmt) {
+    public Void visitClassStatement(Statement.Class stmt)  {
         ClassType enclosingClass = currentClass;
         currentClass = ClassType.CLASS;
         declare(stmt.name);
@@ -112,17 +116,26 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         return null;
     }
     @Override
-    public Void visitFunctionStatement(Statement.Function stmt) {
+    public Void visitFunctionStatement(Statement.Function stmt)  {
         declare(stmt.name);
         define(stmt.name);
         resolveFunction(stmt, FunctionType.FUNCTION);
         return null;
     }
     @Override
-    public Void visitIfStatement(Statement.If stmt) {
+    public Void visitIfStatement(Statement.If stmt)  {
         resolve(stmt.condition);
         resolve(stmt.thenBranch);
         if (stmt.elseBranch != null) resolve(stmt.elseBranch);
+        return null;
+    }
+    @Override
+    public Void visitImportStatement(Statement.Import stmt) {
+        try {
+            resolveImport(stmt);
+        } catch(IOException e){
+            HunZel.error(1, "Not necessarily on line one, but there was an error in importing and the file may not exist.");
+        }
         return null;
     }
     //replaced with native function

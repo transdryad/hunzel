@@ -9,6 +9,7 @@ public abstract class Statement {
     R visitExprStatement(Expr statement);
     R visitFunctionStatement(Function statement);
     R visitIfStatement(If statement);
+    R visitImportStatement(Import statement);
     R visitReturnStatement(Return statement);
     R visitVarStatement(Var statement);
     R visitWhileStatement(While statement);
@@ -84,6 +85,18 @@ public abstract class Statement {
     final Expression condition;
     final Statement thenBranch;
     final Statement elseBranch;
+  }
+  public static class Import extends Statement {
+    Import(Token file) {
+      this.file = file;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitImportStatement(this);
+    }
+
+    final Token file;
   }
   public static class Return extends Statement {
     Return(Token keyword, Expression value) {

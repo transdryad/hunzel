@@ -29,6 +29,7 @@ class Scanner {
         keywords.put("for",    FOR);
         keywords.put("fun",    FUN);
         keywords.put("if",     IF);
+        keywords.put("import", IMPORT);
         keywords.put("nil",    NIL);
         keywords.put("or",     OR);
         //replaced with native function.

@@ -54,6 +54,8 @@ class Parser {
     private Statement statement() {
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
+        if (match(IMPORT)) return importStatement();
+
         //if (match(PRINT)) return printStatement();
         if (match(RETURN)) return returnStatement();
         if (match(WHILE)) return whileStatement();
@@ -105,6 +107,11 @@ class Parser {
             elseBranch = statement();
         }
         return new Statement.If(condition, thenBranch, elseBranch);
+    }
+    private Statement importStatement() {
+        Token file = consume(IDENTIFIER, "Expect a file to import.");
+        consume(SEMICOLON, "Expect ';' after import file");
+        return new Statement.Import(file);
     }
     // replaced with native function.
     //private Statement printStatement() {
@@ -358,8 +365,9 @@ class Parser {
                 case VAR:
                 case FOR:
                 case IF:
+                case IMPORT:
                 case WHILE:
-                case PRINT:
+                //case PRINT:
                 case RETURN:
                     return;
             }

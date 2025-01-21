@@ -1,2 +1,9 @@
-var inputs = input("Type: ");
-println(inputs);
+println("importing...");
+import test;
+println("done importing");
+
+println("begin code");
+var before = clock();
+println(fib(40));
+var after = clock();
+println(after - before);
