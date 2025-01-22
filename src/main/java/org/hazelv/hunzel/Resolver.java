@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.io.File;
 
 class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     private final Interpreter interpreter;
@@ -69,6 +70,10 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         currentFunction = enclosingFunction;
     }
     private void resolveImport(Statement.Import stmt) throws IOException {
+        if (!new File(stmt.file.lexeme + ".hz").isFile()) {
+            HunZel.error(stmt.file, "This file does not exist. Remember: don't include the '.hz' extension when importing files.");
+            return;
+        }
         HunZel.runFile(stmt.file.lexeme + ".hz");
     }
     @Override
@@ -134,7 +139,7 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         try {
             resolveImport(stmt);
         } catch(IOException e){
-            HunZel.error(1, "Not necessarily on line one, but there was an error in importing and the file may not exist.");
+            HunZel.error(stmt.file, "There was an unknown IO error related to this file.");
         }
         return null;
     }
