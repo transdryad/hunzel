@@ -1,5 +1,6 @@
 package org.hazelv.hunzel;
 
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.io.File;
 
 class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     private final Interpreter interpreter;
+    private static String importName;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
     Resolver(Interpreter interpreter) {
@@ -70,8 +72,13 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         currentFunction = enclosingFunction;
     }
     private void resolveImport(Statement.Import stmt) throws IOException {
-        if (!new File(stmt.file.lexeme + ".hz").isFile()) {
-            HunZel.error(stmt.file, "This file does not exist. Remember: don't include the '.hz' extension when importing files.");
+        importName = "";
+        if (!new File(stmt.file.lexeme + ".hz").isFile()){
+            if (!searchFile(new File(HunZel.libDir), stmt.file.lexeme + ".hz")) {
+                HunZel.error(stmt.file, "This name does not exist. Remember: don't include the '.hz' extension when importing files.");
+                return;
+            }
+            HunZel.runFile(importName);
             return;
         }
         HunZel.runFile(stmt.file.lexeme + ".hz");
@@ -262,4 +269,25 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     private void resolve(Expression expr) {
         expr.accept(this);
     }
+    private static boolean searchFile(File file, String search) throws IOException {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            assert files != null;
+            for (File f : files) {
+                boolean found = searchFile(f, search);
+                if (found) {
+                    importName = f.getCanonicalPath();
+                    return true;
+                }
+            }
+        } else {
+            if (search.equals(file.getName())) {
+                importName = file.getName();
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

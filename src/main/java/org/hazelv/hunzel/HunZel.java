@@ -7,11 +7,13 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 public class HunZel {
     private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
+    static String libDir = Optional.ofNullable(System.getenv("HUNZEL_DIR")).orElseThrow(() -> new IllegalStateException("The HUNZEL_DIR environment variable MUST be set."));
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             System.out.println("Usage: hunzel [script]");

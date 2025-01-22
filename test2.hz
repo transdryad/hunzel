@@ -1,5 +1,5 @@
 println("importing...");
-import tes2t;
+import test;
 println("done importing");
 
 println("begin code");
