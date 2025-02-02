@@ -1,9 +1,13 @@
-println("importing...");
-import test;
-println("done importing");
+fun fib(n) {
+    if (n < 2) return n;
+    return fib(n - 1) + fib(n - 2);
+}
 
-println("begin code");
-var before = clock();
-println(fib(40));
-var after = clock();
-println(after - before);
+fun main() {
+    var before = clock();
+    println(fib(40));
+    var after = clock();
+    println(after - before);
+}
+
+main();
