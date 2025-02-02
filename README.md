@@ -14,16 +14,16 @@ fun fib(n) {
 }
 
 fun main() {
-    println("running demo...")
+    println("running demo...");
     var before = clock();
-    println(fib(40));
+    println("The 30th fibonacci number is: " + str(fib(30)));
     var after = clock();
-    println(after - before);
+    println("Seconds taken: " + str(after - before));
+
 }
 
 main();
 ```
-Unfortunately, it takes 70 seconds to run.
 
 There are two modes: file mode and prompt mode.
 To enter prompt mode, run: 
