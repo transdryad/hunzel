@@ -14,6 +14,7 @@ fun fib(n) {
 }
 
 fun main() {
+    println("running demo...")
     var before = clock();
     println(fib(40));
     var after = clock();
