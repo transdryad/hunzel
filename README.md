@@ -4,6 +4,7 @@ HunZel is a object-oriented programming language written in Java that was built 
 There are several stylistic syntax changes, as well as some extra functionality. You can import from other files in the working directory or from the library installation directory that is set in the environment variable HUNZEL_DIR.
 Print statements need parentheses, and println must be used if you want an automatic new line.
 Other than that, pretty much everything's the same as in the book. That's also where the rest of the documentation is.
+The demo video is of the execution of the below example file.
 
 An example file:
 ```
